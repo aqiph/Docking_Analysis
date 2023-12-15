@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 font = FontProperties()
 font.set_size(12)
+import seaborn as sns
+sns.set_palette('hls')
 
 from tools import remove_unnamed_columns
 
@@ -55,18 +57,18 @@ def get_docking_score(id, df_docking, id_column_name_docking):
     """
     df_docking_subset = df_docking[df_docking[id_column_name_docking] == id]
     best_score = df_docking_subset['docking score'].min()
-    print(id, best_score)
+    # print(id, best_score)
     return best_score
 
 
 def plot_activity_dockingScore(input_file, activity_column_name, docking_score_column_list, llabel=False, id_column_name = 'ID'):
     """
-    plot
+    plot correlation between docking score and activity
     :param input_file: str, file path of the input file
-    :param activity_column_name:
-    :param docking_score_column_list:
+    :param activity_column_name: str, name of the activity column
+    :param docking_score_column_list: list of str, list of the score column
     """
-    COLORS = ['red', 'blue', 'orange']
+    COLORS = ['black', 'blue', 'orange']
 
     # output name
     output_file = os.path.splitext(os.path.abspath(input_file))[0]
@@ -98,6 +100,45 @@ def plot_activity_dockingScore(input_file, activity_column_name, docking_score_c
     plt.close()
 
 
+def plot_dockingScore_distribution(input_file_list, docking_score_column_name, labels, cutoff=None):
+    """
+    Plot docking score distribution
+    :param input_file: str, file path of the input file
+    :param docking_score_column_name: str, name of the score column
+    :param labels: list of str, label of docking score for legend
+    :return:
+    """
+    COLORS = ['red', 'orange', 'blue']
+
+    # output name
+    output_file = os.path.splitext(os.path.abspath(input_file_list[0]))[0]
+    output_file = f'{output_file}_distribution.pdf'
+
+    # plot distribution
+    Scores = []
+    for input_file in input_file_list:
+        df = pd.read_csv(input_file)
+        score = df[docking_score_column_name].tolist()
+        Scores.append(score)
+
+    for i, score in enumerate(Scores):
+        sns.histplot(score, bins=50, kde=True, edgecolor='black', stat='density', alpha=0.3, label=labels[i], color=COLORS[i])
+
+    if cutoff is not None:
+        plt.axvline(x=cutoff, color='black', linestyle='--', linewidth=2)
+
+    plt.xlim(-10, -3)
+    plt.xlabel('Docking score')
+    plt.ylabel('Frequency')
+    plt.title('Docking Score Distribution')
+
+    plt.legend()
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
+    plt.show()
+    plt.close()
+
+
+
 
 
 if __name__ == '__main__':
@@ -107,10 +148,17 @@ if __name__ == '__main__':
     # id_column_name_docking = 'Title'
     # add_docking_score(input_file, input_file_docking_score, id_column_name, id_column_name_docking, output_file=None)
 
-    input_file = 'tests/example_docked.csv'
-    activity_column_name = 'IC50 Value'
-    docking_score_column_list = ['Minimum Docking Score', 'Docking Score Pocket1', 'Docking Score Pocket2']
-    plot_activity_dockingScore(input_file, activity_column_name, docking_score_column_list)
+    # input_file = 'tests/example_docked.csv'
+    # activity_column_name = 'IC50 Value'
+    # docking_score_column_list = ['Minimum Docking Score', 'Docking Score Pocket1', 'Docking Score Pocket2']
+    # plot_activity_dockingScore(input_file, activity_column_name, docking_score_column_list)
+
+    input_file = ['tests/example0_dockingScore_distribution.csv', 'tests/example1_dockingScore_distribution.csv',
+                  'tests/example2_dockingScore_distribution.csv']
+    docking_score_column_name = 'Docking_Score'
+    labels = ['R2_S0', 'R2_S1', 'R2_S2']
+    cutoff = -6.9
+    plot_dockingScore_distribution(input_file, docking_score_column_name, labels, cutoff)
 
 
 
