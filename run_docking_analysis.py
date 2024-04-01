@@ -15,17 +15,35 @@ if module_path not in sys.path:
     sys.path.append(module_path)
     print('Add module path')
 
-from util import add_docking_score, plot_activity_dockingScore
+from main import get_DockingScore, get_DrugLikeCmpds, get_TopScoringCmpds_id, get_MMGBSA, select_Cmpds
 
 
 if __name__ == '__main__':
-    input_file = 'tests/example.csv'
-    input_file_docking_score = 'tests/example_docking.csv'
-    id_column_name = 'ID'
-    id_column_name_docking = 'Title'
-    add_docking_score(input_file, input_file_docking_score, id_column_name, id_column_name_docking, output_file=None)
+    ### Get docking score ###
+    input_file = 'tests/test_DockingScore/test_get_DockingScore.csv'
+    get_DockingScore(input_file)
 
-    input_file = 'tests/example_docked.csv'
-    activity_column_name = 'IC50 Value'
-    docking_score_column_list = ['Minimum Docking Score', 'Docking Score Pocket1', 'Docking Score Pocket2']
-    plot_activity_dockingScore(input_file, activity_column_name, docking_score_column_list)
+    ### Get drug-like compounds ###
+    input_file_dockingScore = 'tests/test_DockingScore/test_get_DockingScore_DockingScore.csv'
+    input_file_property = 'tests/test_DockingScore/test_get_DrugLikeCmpds_properties.csv'
+    get_DrugLikeCmpds(input_file_dockingScore, input_file_property, cutoff_MW=700.0, cutoff_logP=(0.0, 5.0))
+
+    ### Get unique top-ranking compounds ###
+    input_file = 'tests/test_DockingScore/test_get_DockingScore_DockingScore_drugLike.csv'
+    # Using top percentage
+    # get_TopScoringCmpds_id(input_file, method='percentage', dockingScore_percentage=0.2, total_num_compounds=100)
+    # Using docking score cutoff
+    get_TopScoringCmpds_id(input_file, method='cutoff', dockingScore_cutoff=-5.0)
+
+    ### Get MM-GBSA dG binding energy ###
+    input_file = 'tests/test_MMGBSA/test_get_MMGBSA.csv'
+    get_MMGBSA(input_file)
+
+    ### Select compounds based on docking score and MM-GBSA ###
+    input_file_dockingScore = 'tests/test_MMGBSA/test_select_Cmpds_DockingScore.csv'
+    input_file_mmgbsa = 'tests/test_MMGBSA/test_get_MMGBSA_MMGBSA.csv'
+    # select_Cmpds(input_file_dockingScore, input_file_mmgbsa, dockingScore_method='cutoff', mmgbsa_method='cutoff',
+    #              merge_method='outer', dockingScore_cutoff = -9.0, mmgbsa_cutoff=-90.0)
+    select_Cmpds(input_file_dockingScore, input_file_mmgbsa, dockingScore_method='percentage',
+                 mmgbsa_method='percentage', total_num_compounds=100,
+                 merge_method='outer', dockingScore_percentage=0.1, mmgbsa_percentage=0.1)
