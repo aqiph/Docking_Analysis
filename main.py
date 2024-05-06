@@ -17,7 +17,7 @@ from tools import remove_unnamed_columns
 def get_DockingScore(input_file):
     """
     Get docking score from raw file
-    :param input_file: str, file path of the input docking score file
+    :param input_file: str, path of the input docking score file
     """
     # files
     output_file = os.path.splitext(os.path.abspath(input_file))[0] + '_DockingScore.csv'
@@ -41,8 +41,8 @@ def get_DockingScore(input_file):
 def get_DrugLikeCmpds(input_file_dockingScore, input_file_property, cutoff_MW=700.0, cutoff_logP=(0.0, 5.0)):
     """
     Combine drug-like properties and docking score, filter compounds according to properties.
-    :param input_file_dockingScore: str, file path of the input docking score file
-    :param input_file_property: str, file path of the input property file
+    :param input_file_dockingScore: str, path of the input docking score file
+    :param input_file_property: str, path of the input property file
     :param cutoff_MW: float, cutoff value for MW
     :param cutoff_logP: tuple of two floats, cutoff values for logP, i.e., (min, max)
     """
@@ -84,7 +84,7 @@ def logP_filter(logP, cutoff_logP):
 def get_TopScoringCmpds_id(input_file, method='percentage', **kwargs):
     """
     Get a list of unique top-ranking compounds based on the given percentage.
-    :param input_file: str, file path of the input file
+    :param input_file: str, path of the input file
     :param method: str, method using which to get top-ranking molecules, allowed values include 'cutoff' and 'percentage'
     :param total_num_compounds: int, total number of unique compounds. Use the number of unique compounds from input_file, if not specified.
     :param dockingScore_percentage: float, percentage of the top-ranking compounds, if method == 'percentage'
@@ -131,7 +131,7 @@ def get_TopScoringCmpds_id(input_file, method='percentage', **kwargs):
 def get_MMGBSA(input_file):
     """
     Get MM-GBSA dG binding energy from raw file
-    :param input_file: str, file path of the input MM-GBSA file
+    :param input_file: str, path of the input MM-GBSA file
     """
     # files
     output_file = os.path.splitext(os.path.abspath(input_file))[0] + '_MMGBSA.csv'
@@ -155,11 +155,11 @@ def get_MMGBSA(input_file):
 def select_Cmpds(input_file_dockingScore, input_file_mmgbsa, dockingScore_method, mmgbsa_method, merge_method='outer', **kwargs):
     """
     Select compounds according to docking score and MM-GBSA dG
-    :param input_file_dockingScore:
-    :param input_file_mmgbsa:
-    :param dockingScore_method:
-    :param mmgbsa_method:
-    :param merge_method:
+    :param input_file_dockingScore: str, path of the input docking score file
+    :param input_file_mmgbsa: str, path of the input MM-GBSA file
+    :param dockingScore_method: str, method using which to get top-ranking molecules based on docking score, allowed values include 'cutoff' and 'percentage'
+    :param mmgbsa_method: str, method using which to get top-ranking molecules based on MM-GBSA dG, allowed values include 'cutoff' and 'percentage'
+    :param merge_method: str, method to merge results selected by docking score and MM-GBSA dG
     :param total_num_compounds: int, total number of unique compounds. Use the number of unique compounds from input_file, if not specified.
     :param dockingScore_percentage: float, percentage of the top-ranking compounds according to docking score, if dockingScore_method == 'percentage'
     :param dockingScore_cutoff: float, cutoff for docking score, if dockingScore_method == 'cutoff'

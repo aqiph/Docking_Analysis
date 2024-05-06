@@ -22,8 +22,8 @@ from tools import remove_unnamed_columns
 def add_DockingScore(input_file, input_file_docking_score, id_column_name = 'ID', id_column_name_docking = 'ID',  output_file = None):
     """
     Add docking scores from input_file_docking_score to input_file as a new column
-    :param input_file: str, file path of the input file
-    :param input_file_docking_score: file path of the input docking score file
+    :param input_file: str, path of the input file
+    :param input_file_docking_score: path of the input docking score file
     :param id_column_name: str, name of the ID column in the main file
     :param id_column_name_docking: str, name of the ID column in the docking score file
     :param output_file: str or None, pre-defined output file name
@@ -64,7 +64,7 @@ def get_DockingScore(id, df_docking, id_column_name_docking):
 def plot_activity_DockingScore(input_file, activity_column_name, docking_score_column_list, llabel=False, id_column_name = 'ID'):
     """
     Plot correlation between docking score and activity
-    :param input_file: str, file path of the input file
+    :param input_file: str, path of the input file
     :param activity_column_name: str, name of the activity column
     :param docking_score_column_list: list of str, list of the score column
     """
@@ -103,7 +103,7 @@ def plot_activity_DockingScore(input_file, activity_column_name, docking_score_c
 def plot_DockingScoreDistribution(input_file_list, docking_score_column_name, labels, cutoff=None):
     """
     Plot docking score distribution
-    :param input_file: str, file path of the input file
+    :param input_file_list: list of strs, paths of the input files
     :param docking_score_column_name: str, name of the score column
     :param labels: list of str, label of docking score for legend
     :return:
@@ -141,7 +141,7 @@ def plot_DockingScoreDistribution(input_file_list, docking_score_column_name, la
 def combine_files(input_file_list, columns=None, **kwargs):
     """
     Combine input files
-    :param input_file_list: list of strs, file path of the input files
+    :param input_file_list: list of strs, paths of the input files
     :param columns: list of strs, list of column names in the output file
     """
     # files
