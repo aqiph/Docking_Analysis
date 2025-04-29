@@ -15,18 +15,25 @@ if module_path not in sys.path:
     sys.path.append(module_path)
     print('Add module path')
 
-from main import get_DockingScore, get_DrugLikeCmpds, get_TopScoringCmpds_id, get_MMGBSA, select_Cmpds
+from main import filter_by_dockingScore, filter_by_property, get_TopScoringCmpds_id, get_MMGBSA, select_Cmpds
 
 
 if __name__ == '__main__':
-    ### Get docking score ###
-    input_file = 'tests/test_DockingScore/test_get_DockingScore.csv'
-    get_DockingScore(input_file)
+    ### 1. Apply docking score filter ###
+    # input_file_SMILES = 'tests/test_SMILES_file.csv'
+    # input_file_dockingScore = 'tests/test_dockingScore_filter.csv'
+    # id_column_name = 'ID'
+    # filter_by_dockingScore(input_file_SMILES, input_file_dockingScore, id_column_name,
+    #                        dockingScore_column_name='docking score', dockingScore_cutoff=-6.9)
 
-    ### Get drug-like compounds ###
-    input_file_dockingScore = 'tests/test_DockingScore/test_get_DockingScore_DockingScore.csv'
-    input_file_property = 'tests/test_DockingScore/test_get_DrugLikeCmpds_properties.csv'
-    get_DrugLikeCmpds(input_file_dockingScore, input_file_property, cutoff_MW=700.0, cutoff_logP=(0.0, 5.0))
+    ### 2. Apply property filters ###
+    # input_file_SMILES = 'tests/test_SMILES_file.csv'
+    # input_file_property = 'tests/test_property_filter.csv'
+    # id_column_name = 'ID'
+    # property_column_names = ['Docking_Score', 'MW', 'logP', 'HBD', 'HBA', 'TPSA']
+    # property_filters = {'MW': lambda x: x <= 650, 'logP': lambda x: x <= 5.5}
+    # filter_by_property(input_file_SMILES, input_file_property, id_column_name,
+    #                    property_column_names=property_column_names, property_filters=property_filters))
 
     ### Get unique top-ranking compounds ###
     input_file = 'tests/test_DockingScore/test_get_DockingScore_DockingScore_drugLike.csv'

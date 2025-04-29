@@ -14,71 +14,92 @@ from tools import remove_unnamed_columns
 
 
 
-def get_DockingScore(input_file):
+def filter_by_dockingScore(input_file_SMILES, input_file_dockingScore, id_column_name='ID',
+                           dockingScore_column_name='r_i_docking_score', dockingScore_cutoff=0.0):
     """
-    Get docking score from raw file
-    :param input_file: str, path of the input docking score file
-    """
-    # files
-    output_file = os.path.splitext(os.path.abspath(input_file))[0] + '_DockingScore.csv'
-
-    df = pd.read_csv(input_file)
-    df = pd.DataFrame(df, columns=['title', 'SMILES', 'r_i_docking_score'])
-    df.rename(columns={'title': 'Title'}, inplace=True)
-    print('Number of rows in docking score file:', df.shape[0])
-    # round
-    df['Docking_Score'] = df['r_i_docking_score'].apply(lambda score: np.round(score, decimals=3))
-    df = pd.DataFrame(df, columns=['Title', 'SMILES', 'Docking_Score'])
-
-    # write output file
-    df = df.reset_index(drop=True)
-    print('Number of rows:', df.shape[0])
-    df = remove_unnamed_columns(df)
-    df.to_csv(output_file)
-    print('Getting docking score is done.')
-
-
-def get_DrugLikeCmpds(input_file_dockingScore, input_file_property, cutoff_MW=700.0, cutoff_logP=(0.0, 5.0)):
-    """
-    Combine drug-like properties and docking score, filter compounds according to properties.
+    Filter compounds based on docking score
+    :param input_file_SMILES: str, path of the input SMILES file
     :param input_file_dockingScore: str, path of the input docking score file
-    :param input_file_property: str, path of the input property file
-    :param cutoff_MW: float, cutoff value for MW
-    :param cutoff_logP: tuple of two floats, cutoff values for logP, i.e., (min, max)
+    :param id_column_name: str, name of the ID column in input_file_dockingScore
+    :param dockingScore_column_name: str, name of the docking score column
+    :param dockingScore_cutoff: float, docking score cutoff
+    :return: None
     """
     # files
-    output_file= os.path.splitext(os.path.abspath(input_file_dockingScore))[0] + '_drugLike.csv'
+    output_file = os.path.splitext(os.path.abspath(input_file_dockingScore))[0] + '_DockingScore'
 
-    df_docking = pd.read_csv(input_file_dockingScore)
-    df_docking = pd.DataFrame(df_docking, columns=['Title', 'SMILES', 'Docking_Score'])
-    print('Number of rows in docking score file:', df_docking.shape[0])
-    df_property = pd.read_csv(input_file_property)
-    df_property = pd.DataFrame(df_property, columns=['Title', 'MW', 'logP'])
-    print('Number of rows in property file:', df_property.shape[0])
+    df_SMILES = pd.read_csv(input_file_SMILES)
+    # df_SMILES = pd.DataFrame(df_SMILES, columns=['ID', 'SMILES', 'Cleaned_SMILES'])
+    print('Number of rows in SMILES file:', df_SMILES.shape[0])
+    df = pd.read_csv(input_file_dockingScore)
+    df.rename(columns={id_column_name: 'ID', dockingScore_column_name: 'Docking_Score'}, inplace=True)
+    df = pd.DataFrame(df, columns=['ID', 'Docking_Score'])
+    print('Number of rows in docking score file:', df.shape[0])
 
-    # merge docking score and properties, and apply filters
-    df = pd.merge(df_docking, df_property, how='left', on=['Title'])
-    df = pd.DataFrame(df, columns=['Title', 'SMILES', 'Docking_Score', 'MW', 'logP'])
-    df = pd.DataFrame(df[df['MW'].apply(lambda MW: MW_filter(MW, cutoff_MW))])
-    df = pd.DataFrame(df[df['logP'].apply(lambda logP: logP_filter(logP, cutoff_logP))])
+    # round
+    df['Docking_Score'] = df['Docking_Score'].apply(lambda score: np.round(score, decimals=3))
+    # sort and deduplicate
+    df.sort_values(by=['Docking_Score'], ascending=True, inplace=True)
+    df = df.drop_duplicates(['ID'], keep='first', ignore_index=True)
+    # filter
+    df_filtered = df[df['Docking_Score'] <= dockingScore_cutoff]
+    df_filtered = pd.DataFrame(df_filtered, columns=['ID', 'Docking_Score'])
+    # merge
+    df_filtered = pd.merge(df_filtered, df_SMILES, how='right', on=['ID'])
+    # df_filtered = pd.DataFrame(df_filtered, columns=['ID', 'SMILES', 'Cleaned_SMILES', 'Docking_Score'])
+
+    # write output file
+    df_filtered = df_filtered.reset_index(drop=True)
+    print('Number of rows in filtered docking score file:', df_filtered.shape[0])
+    df_filtered = remove_unnamed_columns(df_filtered)
+    df_filtered.to_csv(f'{output_file}_{df_filtered.shape[0]}.csv')
+    print('Applying docking score filter is done.')
+
+
+def filter_by_property(input_file_SMILES, input_file_property, id_column_name='ID',
+                       property_column_names=None, property_filters=None):
+    """
+    Filter compounds based on property cutoff
+    :param input_file_SMILES: str, path of the input SMILES file
+    :param input_file_property: str, path of the input property file
+    :param id_column_name: str, name of the ID column in input_file_property
+    :param property_column_names: list of strs or None, names of the property columns
+    :param property_filters: dict or None, dict of functions for property filters
+    :return: None
+    """
+    if property_column_names is None:
+        property_column_names = []
+    if property_filters is None:
+        property_filters = {'MW':lambda x: x <= 650, 'logP':lambda x: x <= 5.5}
+
+    # files
+    output_file = os.path.splitext(os.path.abspath(input_file_property))[0] + '_Property'
+
+    df_SMILES = pd.read_csv(input_file_SMILES)
+    # df_SMILES = pd.DataFrame(df_SMILES, columns=['ID', 'SMILES', 'Cleaned_SMILES'])
+    print('Number of rows in SMILES file:', df_SMILES.shape[0])
+    df = pd.read_csv(input_file_property)
+    df.rename(columns={id_column_name:'ID'}, inplace=True)
+    df = pd.DataFrame(df, columns=['ID']+property_column_names)
+    print('Number of rows in property file:', df.shape[0])
+
+    # filter
+    for column, filter in property_filters.items():
+        try:
+            df = df[df[column].apply(filter)]
+        except Exception:
+            print(f'Error: Filter for {column} column is not applied.')
+            continue
+    # merge
+    df = pd.merge(df, df_SMILES, how='left', on=['ID'])
+    # df = pd.DataFrame(df, columns=['ID', 'SMILES', 'Cleaned_SMILES']+property_column_names)
 
     # write output file
     df = df.reset_index(drop=True)
-    print('Number of rows:', df.shape[0])
+    print('Number of rows in filtered property file:', df.shape[0])
     df = remove_unnamed_columns(df)
-    df.to_csv(output_file)
-    print('Getting drug-like compounds is done.')
-
-
-def MW_filter(MW, cutoff_MW):
-    return MW <= cutoff_MW
-
-
-def logP_filter(logP, cutoff_logP):
-    if (logP >= cutoff_logP[0]) and (logP <= cutoff_logP[1]):
-        return True
-    else:
-        return False
+    df.to_csv(f'{output_file}_{df.shape[0]}.csv')
+    print('Applying property filters is done.')
 
 
 def get_TopScoringCmpds_id(input_file, method='percentage', **kwargs):
@@ -128,27 +149,32 @@ def get_TopScoringCmpds_id(input_file, method='percentage', **kwargs):
     print('Getting top-scoring compounds is done.')
 
 
-def get_MMGBSA(input_file):
+def get_MMGBSA(input_file, input_file_mmgbsa):
     """
     Get MM-GBSA dG binding energy from raw file
-    :param input_file: str, path of the input MM-GBSA file
+    :param input_file_mmgbsa: str, path of the input MM-GBSA file
     """
     # files
-    output_file = os.path.splitext(os.path.abspath(input_file))[0] + '_MMGBSA.csv'
+    output_file = os.path.splitext(os.path.abspath(input_file))[0] + '_MMGBSA'
 
     df = pd.read_csv(input_file)
-    df = pd.DataFrame(df, columns=['title', 'r_psp_MMGBSA_dG_Bind'])
-    df.rename(columns={'title': 'Title'}, inplace=True)
-    print('Number of rows in MM-GBSA file:', df.shape[0])
+    df_mmgbsa = pd.read_csv(input_file_mmgbsa)
+    df_mmgbsa.rename(columns={'title': 'ID', 'r_psp_MMGBSA_dG_Bind':'MMGBSA_dG_Bind'}, inplace=True)
+    df_mmgbsa = pd.DataFrame(df_mmgbsa, columns=['ID', 'MMGBSA_dG_Bind'])
+    print('Number of rows in MM-GBSA file:', df_mmgbsa.shape[0])
+    # remove duplicates
+    df_mmgbsa.sort_values(by=['MMGBSA_dG_Bind'], ascending=True, inplace=True)
+    df_mmgbsa.drop_duplicates(['ID'], keep='first', ignore_index=True, inplace=True)
     # round
-    df['MMGBSA_dG_Bind'] = df['r_psp_MMGBSA_dG_Bind'].apply(lambda score: np.round(score, decimals=2))
-    df = pd.DataFrame(df, columns=['Title', 'MMGBSA_dG_Bind'])
+    df_mmgbsa.loc[:, 'MMGBSA_dG_Bind'] = df_mmgbsa['MMGBSA_dG_Bind'].apply(lambda score: np.round(score, decimals=2))
+    # merge
+    df = df.merge(df_mmgbsa, how='left', on=['ID'])
 
     # write output file
     df = df.reset_index(drop=True)
     print('Number of rows:', df.shape[0])
     df = remove_unnamed_columns(df)
-    df.to_csv(output_file)
+    df.to_csv(f'{output_file}_{df.shape[0]}.csv')
     print('Getting MM-GBSA dG is done.')
 
 
@@ -172,16 +198,16 @@ def select_Cmpds(input_file_dockingScore, input_file_mmgbsa, dockingScore_method
     df_mmgbsa = pd.read_csv(input_file_mmgbsa)
 
     # sort values and deduplicate
-    df_dockingScore.sort_values(by=['Docking_Score'], ascending=True, inplace=True)
-    df_dockingScore.drop_duplicates(['Title'], keep='first', ignore_index=True, inplace=True)
+    df_dockingScore.sort_values(by=['Docking_Score_P1'], ascending=True, inplace=True)
+    df_dockingScore.drop_duplicates(['ID'], keep='first', ignore_index=True, inplace=True)
     df_mmgbsa.sort_values(by=['MMGBSA_dG_Bind'], ascending=True, inplace=True)
-    df_mmgbsa.drop_duplicates(['Title'], keep='first', ignore_index=True, inplace=True)
+    df_mmgbsa.drop_duplicates(['ID'], keep='first', ignore_index=True, inplace=True)
     print('Number of rows in the docking socre file:', df_dockingScore.shape[0])
     print('Number of rows in the MM-GBSA file:', df_mmgbsa.shape[0])
 
     # merge docking score and MM-GBSA
-    df = df_dockingScore.merge(df_mmgbsa, how='left', on=['Title'])
-    df = pd.DataFrame(df, columns=['Title', 'SMILES', 'Docking_Score', 'MMGBSA_dG_Bind'])
+    df = df_dockingScore.merge(df_mmgbsa, how='left', on=['ID'])
+    # df = pd.DataFrame(df, columns=['Title', 'SMILES', 'Docking_Score', 'MMGBSA_dG_Bind'])
     num_cmpds = kwargs.get('total_num_compounds', df.shape[0])
 
     # get top-ranked molecules based on docking score
@@ -285,14 +311,21 @@ def cut_file(input_file):
 
 
 if __name__ == '__main__':
-    ### Get docking score ###
-    # input_file = 'tests/test_DockingScore/test_get_DockingScore.csv'
-    # get_DockingScore(input_file)
+    ### 1. Apply docking score filter ###
+    # input_file_SMILES = 'tests/test_SMILES_file.csv'
+    # input_file_dockingScore = 'tests/test_dockingScore_filter.csv'
+    # id_column_name = 'ID'
+    # filter_by_dockingScore(input_file_SMILES, input_file_dockingScore, id_column_name,
+    #                     dockingScore_column_name='docking score', dockingScore_cutoff=-6.9)
 
-    ### Get drug-like compounds ###
-    # input_file_dockingScore = 'tests/test_DockingScore/test_get_DockingScore_DockingScore.csv'
-    # input_file_property = 'tests/test_DockingScore/test_get_DrugLikeCmpds_properties.csv'
-    # get_DrugLikeCmpds(input_file_dockingScore, input_file_property, cutoff_MW=700.0, cutoff_logP=(0.0, 5.0))
+    ### 2. Apply property filters ###
+    # input_file_SMILES = 'tests/test_SMILES_file.csv'
+    # input_file_property = 'tests/test_property_filter.csv'
+    # id_column_name = 'ID'
+    # property_column_names = ['Docking_Score', 'MW', 'logP', 'HBD', 'HBA', 'TPSA']
+    # property_filters = {'MW':lambda x: x <= 650, 'logP':lambda x: x <= 5.5}
+    # filter_by_property(input_file_SMILES, input_file_property, id_column_name,
+    #                 property_column_names=property_column_names, property_filters=property_filters)
 
     ### Get unique top-ranking compounds ###
     # input_file = 'tests/test_DockingScore/test_get_DockingScore_DockingScore_drugLike.csv'
