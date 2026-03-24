@@ -175,9 +175,9 @@ def get_parser():
     """
     argparser = argparse.ArgumentParser()
 
-    argparser.add_argument('--input_file', default='tests/test_residue_contact/residue_contact_input.csv', type=str, help='Path of the file specifying residue contact info.')
-    argparser.add_argument('--input_protein_pdb', default='tests/test_residue_contact/8DCS-prepared.pdb', type=str, help='Path of the protein pdb file.')
-    argparser.add_argument('--input_ligand_sdf', default='tests/test_residue_contact/top_molecules.sdf', type=str, help='Path of the ligand sdf file.')
+    argparser.add_argument('--input_file', default='examples/test_residue_contact/residue_contact_input.csv', type=str, help='Path of the file specifying residue contact info.')
+    argparser.add_argument('--input_protein_pdb', default='examples/test_residue_contact/8DCS-prepared.pdb', type=str, help='Path of the protein pdb file.')
+    argparser.add_argument('--input_ligand_sdf', default='examples/test_residue_contact/top_molecules.sdf', type=str, help='Path of the ligand sdf file.')
     argparser.add_argument('--working_dir', default='contact_count', type=str, help='Name of the working directory.')
     argparser.add_argument('--num_molecules', default=1, type=int, help='Number of ligands.')
     argparser.add_argument('--output_file', default='properties.csv', type=str, help='Path of the output file.')

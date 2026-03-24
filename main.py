@@ -312,15 +312,15 @@ def cut_file(input_file):
 
 if __name__ == '__main__':
     ### 1. Apply docking score filter ###
-    # input_file_SMILES = 'tests/test_SMILES_file.csv'
-    # input_file_dockingScore = 'tests/test_dockingScore_filter.csv'
+    # input_file_SMILES = 'examples/test_SMILES_file.csv'
+    # input_file_dockingScore = 'examples/test_dockingScore_filter.csv'
     # id_column_name = 'ID'
     # filter_by_dockingScore(input_file_SMILES, input_file_dockingScore, id_column_name,
     #                     dockingScore_column_name='docking score', dockingScore_cutoff=-6.9)
 
     ### 2. Apply property filters ###
-    # input_file_SMILES = 'tests/test_SMILES_file.csv'
-    # input_file_property = 'tests/test_property_filter.csv'
+    # input_file_SMILES = 'examples/test_SMILES_file.csv'
+    # input_file_property = 'examples/test_property_filter.csv'
     # id_column_name = 'ID'
     # property_column_names = ['Docking_Score', 'MW', 'logP', 'HBD', 'HBA', 'TPSA']
     # property_filters = {'MW':lambda x: x <= 650, 'logP':lambda x: x <= 5.5}
@@ -328,7 +328,7 @@ if __name__ == '__main__':
     #                 property_column_names=property_column_names, property_filters=property_filters)
 
     ### Get unique top-ranking compounds ###
-    # input_file = 'tests/test_DockingScore/test_get_DockingScore_DockingScore_drugLike.csv'
+    # input_file = 'examples/test_DockingScore/test_get_DockingScore_DockingScore_drugLike.csv'
     # Using top percentage
     # get_TopScoringCmpds_id(input_file, method='percentage', dockingScore_percentage=0.2, total_num_compounds=100)
     # Using docking score cutoff
@@ -338,19 +338,19 @@ if __name__ == '__main__':
     ### Command on cluster: structsubset --title-file *_topScoringID.txt *_pv.maegz *_TopCmpds.maegz
 
     ### Get MM-GBSA dG binding energy ###
-    # input_file = 'tests/test_MMGBSA/test_get_MMGBSA.csv'
+    # input_file = 'examples/test_MMGBSA/test_get_MMGBSA.csv'
     # get_MMGBSA(input_file)
 
     ### Select compounds based on docking score and MM-GBSA ###
-    # input_file_dockingScore = 'tests/test_MMGBSA/test_select_Cmpds_DockingScore.csv'
-    # input_file_mmgbsa = 'tests/test_MMGBSA/test_get_MMGBSA_MMGBSA.csv'
+    # input_file_dockingScore = 'examples/test_MMGBSA/test_select_Cmpds_DockingScore.csv'
+    # input_file_mmgbsa = 'examples/test_MMGBSA/test_get_MMGBSA_MMGBSA.csv'
     # select_Cmpds(input_file_dockingScore, input_file_mmgbsa, dockingScore_method='cutoff', mmgbsa_method='cutoff',
     #              merge_method='outer', dockingScore_cutoff = -9.0, mmgbsa_cutoff=-90.0)
     # select_Cmpds(input_file_dockingScore, input_file_mmgbsa, dockingScore_method='percentage', mmgbsa_method='percentage', total_num_compounds=100,
     #              merge_method='outer', dockingScore_percentage=0.1, mmgbsa_percentage=0.1)
 
     ### Select compounds from clusters ###
-    input_file = 'tests/test_DockingScore/test_get_topScoring_from_clusters.csv'
+    input_file = 'examples/test_DockingScore/test_get_topScoring_from_clusters.csv'
     score_column_name = 'Docking_Score'
     label_column_name = 'MCS Cluster'
     get_topScoring_from_clusters(input_file, score_column_name, label_column_name, count=1, singularity_method='all',
@@ -358,7 +358,7 @@ if __name__ == '__main__':
 
 
     ### Testing ###
-    # input_file = 'tests/prime_mmgbsa_SP_6RR7_P1_TopCmps-out.csv'
+    # input_file = 'examples/prime_mmgbsa_SP_6RR7_P1_TopCmps-out.csv'
     # cut_file(input_file)
 
 

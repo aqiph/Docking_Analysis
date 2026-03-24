@@ -1,0 +1,4 @@
+﻿ID Ligand_Atom Residue_Number Residue_Atom Distance
+contact1 @N*,O*,Br,F,Cl,I 121 @OD1,OD2 4.5
+contact2 &!@H= 121 &!@H= 4.5
+contact2 @N*,O*,Br,F,Cl,I 122 @OD1,OD2 4.5
