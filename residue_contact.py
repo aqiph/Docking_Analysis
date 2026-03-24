@@ -12,7 +12,7 @@ from Bio import PDB
 import argparse
 
 # global variable
-BASH_PATH = '/home/hanguo02/Code/Docking_Analysis/residue_contact'
+BASH_PATH = 'residue_contact'
 
 
 def preprocessing(input_ligand_sdf, working_dir_path, num_molecules):

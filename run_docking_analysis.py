@@ -10,7 +10,7 @@ Created on Tue Jul 25 10:29:00 2023
 import sys
 
 path_list = sys.path
-module_path = '/Users/guohan/Documents/Codes/Docking_Analysis'
+module_path = '/Users/hanguo/Documents/Codes/Docking_Analysis'
 if module_path not in sys.path:
     sys.path.append(module_path)
     print('Add module path')
